@@ -2,39 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Prodia Image Generator</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Generate an Image</h1>
+  <main class="container">
+    <h1>Prodia Image Generator</h1>
 
-  <h2>Login</h2>
-  <form id="loginForm">
-    <label for="username">Username:</label>
-    <input type="text" id="username" required><br>
-    <label for="password">Password:</label>
-    <input type="password" id="password" required><br>
-    <button type="submit">Login</button>
-  </form>
+    <!-- Input form -->
+    <form id="generateForm">
+      <label for="prompt">Enter a prompt:</label>
+      <input type="text" id="prompt" placeholder="A beautiful sunset..." required>
+      <button type="submit">Generate Image</button>
+    </form>
 
-  <h2>Generate Image</h2>
-  <form id="generateForm">
-    <label for="prompt">Prompt:</label>
-    <input type="text" id="prompt" required><br>
-    <label for="model">Model:</label>
-    <select id="model">
-      <option value="edgeOfRealism_eorV20.safetensors">Edge of Realism</option>
-      <option value="analog-diffusion-1.0.ckpt">Analog Diffusion</option>
-      <option value="Realistic_Vision_V5.1.safetensors">Realistic Vision</option>
-    </select><br>
-    <label for="steps">Steps:</label>
-    <input type="number" id="steps" value="50" min="1" max="100"><br>
-    <button type="submit">Generate</button>
-  </form>
+    <!-- Image Gallery -->
+    <h2>Generated Images</h2>
+    <div id="gallery"></div>
 
-  <h2>Status: <span id="status">Waiting for user input...</span></h2>
-  <img id="generatedImage" style="display:none;" alt="Generated Image">
+  </main>
 
   <script src="script.js"></script>
 </body>

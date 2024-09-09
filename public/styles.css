@@ -1,34 +1,44 @@
 body {
   font-family: Arial, sans-serif;
-  padding: 20px;
+  text-align: center;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
 }
 
-h1, h2 {
-  color: #333;
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 form {
   margin-bottom: 20px;
 }
 
-input, select {
-  margin: 10px 0;
-}
-
 button {
-  padding: 10px;
-  background-color: #007BFF;
+  padding: 10px 15px;
+  background-color: #4CAF50;
   color: white;
   border: none;
   cursor: pointer;
+  border-radius: 5px;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #45a049;
 }
 
-#generatedImage {
-  margin-top: 20px;
-  width: 512px;
-  height: 512px;
+#gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+#gallery img {
+  max-width: 100%;
+  border-radius: 8px;
 }

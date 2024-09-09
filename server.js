@@ -1,34 +1,47 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
-const path = require('path'); // For working with file paths
+const { createProdia } = require('prodia'); // Make sure you have the prodia package installed
+const path = require('path');
 
+// Load environment variables
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+const prodia = createProdia({ apiKey: process.env.PRODIA_API_KEY });
 
-// Serve static files from the "public" directory (your frontend code)
+// Middleware to parse JSON bodies
+app.use(bodyParser.json());
+
+// Serve the static frontend files (HTML, CSS, JS) from the 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Example API route (protected)
-const { generateImage } = require('./config/prodia');
-const authenticate = require('./middleware/authMiddleware');
-
-app.use(express.json());
-
-app.post('/generate', authenticate, async (req, res) => {
+// Handle image generation requests
+app.post('/generate', async (req, res) => {
   const { prompt, model, steps } = req.body;
+  
   try {
-    const imageUrl = await generateImage(prompt, model, steps);
-    res.json({ success: true, imageUrl });
+    const job = await prodia.generate({
+      prompt,
+      model: model || 'Realistic_Vision_V5.1.safetensors',
+      steps: steps || 50,
+      width: 512,
+      height: 512,
+    });
+
+    // Poll the job until the image is generated
+    const { imageUrl, status } = await prodia.wait(job);
+
+    if (status === 'succeeded') {
+      return res.json({ success: true, imageUrl });
+    } else {
+      return res.status(500).json({ success: false, error: 'Generation failed' });
+    }
   } catch (error) {
+    console.error('Error generating image:', error);
     res.status(500).json({ success: false, error: error.message });
   }
-});
-
-// Fallback route to send "index.html" for unknown routes (Single Page Application)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Start the server
