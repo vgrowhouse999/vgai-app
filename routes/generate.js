@@ -1,6 +1,6 @@
-import express from 'express';
-import authenticate from '../middleware/authMiddleware.js';
-import { generateImage } from '../config/prodia.js';
+const express = require('express');
+const authenticate = require('../middleware/authMiddleware');
+const { generateImage } = require('../config/prodia');
 
 const router = express.Router();
 
@@ -15,4 +15,4 @@ router.post('/', authenticate, async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;
