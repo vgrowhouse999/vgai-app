@@ -1,50 +1,56 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const dotenv = require('dotenv');
-const { createProdia } = require('prodia'); // Make sure you have the prodia package installed
-const path = require('path');
+import express from 'express';
+import bodyParser from 'body-parser';
+import fetch from 'node-fetch'; // Update to import
+import dotenv from 'dotenv';
 
-// Load environment variables
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
-const prodia = createProdia({ apiKey: process.env.PRODIA_API_KEY });
-
-// Middleware to parse JSON bodies
 app.use(bodyParser.json());
 
-// Serve the static frontend files (HTML, CSS, JS) from the 'public' folder
-app.use(express.static(path.join(__dirname, 'public')));
+const port = process.env.PORT || 3000;
 
-// Handle image generation requests
-app.post('/generate', async (req, res) => {
-  const { prompt, model, steps } = req.body;
-  
+const generateImage = async (prompt, model, steps) => {
   try {
-    const job = await prodia.generate({
-      prompt,
-      model: model || 'Realistic_Vision_V5.1.safetensors',
-      steps: steps || 50,
-      width: 512,
-      height: 512,
+    const response = await fetch('https://api.prodia.com/v1/sd/transform', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Prodia-Key': process.env.PRODIA_API_KEY,
+      },
+      body: JSON.stringify({
+        prompt,
+        model: model || 'Realistic_Vision_V5.1.safetensors',
+        steps: steps || 50,
+        cfg_scale: 7,
+        width: 512,
+        height: 512,
+        sampler: 'LMS Karras',
+      }),
     });
 
-    // Poll the job until the image is generated
-    const { imageUrl, status } = await prodia.wait(job);
-
-    if (status === 'succeeded') {
-      return res.json({ success: true, imageUrl });
-    } else {
-      return res.status(500).json({ success: false, error: 'Generation failed' });
+    if (!response.ok) {
+      throw new Error(`Bad Prodia Response: ${response.status}`);
     }
+
+    const result = await response.json();
+    return result.imageUrl;
   } catch (error) {
-    console.error('Error generating image:', error);
-    res.status(500).json({ success: false, error: error.message });
+    throw new Error(`Image generation failed: ${error.message}`);
+  }
+};
+
+app.post('/generate', async (req, res) => {
+  const { prompt, model, steps } = req.body;
+
+  try {
+    const imageUrl = await generateImage(prompt, model, steps);
+    res.json({ success: true, imageUrl });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
-// Start the server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
